@@ -60,6 +60,15 @@
             transform-style: preserve-3d;
         }
 
+        /* Inner fill — eliminates the gap between flap hinge and body top */
+        .envelope-inner {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, #C8B89A, var(--envelope));
+            border-radius: 0 0 10px 10px;
+            z-index: 0;
+        }
+
         .envelope-body {
             position: absolute;
             bottom: 0;
@@ -1274,7 +1283,7 @@
         <div class="env-sparkle" style="top:78%;left:24%">✦</div>
 
         <div class="envelope-container">
-            <!-- FIX 3: card starts hidden (opacity:0, shifted inside) and fades in only when it slides up -->
+            <div class="envelope-inner"></div>
             <div class="envelope-card" id="envelopeCard">
                 <div class="envelope-names">Manjinder <span>&</span> Khujesta</div>
                 <div class="envelope-text">Request the pleasure of your company<br>at their wedding celebration</div>
