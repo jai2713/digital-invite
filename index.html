@@ -1589,18 +1589,14 @@
 
         // Scroll lock function
         function lockScroll() {
+            document.documentElement.style.overflow = 'hidden';
             document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            document.body.style.top = '0px';
         }
 
         function unlockScroll() {
+            document.documentElement.style.overflow = '';
             document.body.style.overflow = '';
             document.body.style.overflowX = 'hidden';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.top = '';
             window.scrollTo(0, 0);
         }
 
@@ -1651,27 +1647,13 @@
 
         // Prevent touch scrolling on mobile while envelope is closed
         window.addEventListener('touchmove', (e) => {
-            if (!envelopeOpened) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-        }, { passive: false, capture: true });
+            if (!envelopeOpened) e.preventDefault();
+        }, { passive: false });
 
-        // Open envelope on tap/swipe on mobile
-        let touchStartY = 0;
-        window.addEventListener('touchstart', (e) => {
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener('touchend', (e) => {
-            if (envelopeOpened) return;
-            const touchEndY = e.changedTouches[0].clientY;
-            const swipedUp = touchStartY - touchEndY > 10;
-            // open on tap OR swipe up
-            if (!swipedUp || touchStartY - touchEndY >= 0) {
-                openEnvelope();
-            }
-        }, { passive: true });
+        // Open envelope on tap (mobile) or click — pointerdown fires reliably on all devices
+        envelopeSection.addEventListener('pointerdown', () => {
+            openEnvelope();
+        });
 
         // Scroll locked via lockScroll() function above
 
