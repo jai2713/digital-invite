@@ -1253,7 +1253,7 @@
                 <span>M</span>
             </div>
         </div>
-        <div class="scroll-hint">Scroll to open</div>
+        <div class="scroll-hint">Tap or scroll to open</div>
     </div>
 
     <!-- Navigation -->
@@ -1607,15 +1607,11 @@
         // Lock scroll initially
         lockScroll();
 
-        window.addEventListener('wheel', (e) => {
+        function openEnvelope() {
             if (envelopeOpened) return;
-
-            e.preventDefault();
-            e.stopPropagation();
-
             envelopeOpened = true;
 
-            // Step 1: Open the flap (rotates backward)
+            // Step 1: Open the flap
             envelopeFlap.classList.add('open');
 
             // Step 2: Hide the seal
@@ -1628,34 +1624,54 @@
 
             // Step 4: Card floats up and fades, then envelope fades to reveal hero
             setTimeout(() => {
-                // Card floats upward and fades
                 envelopeCard.style.transition = 'all 1s ease';
                 envelopeCard.style.opacity = '0';
                 envelopeCard.style.transform = 'translateX(-50%) translateY(-200px) scale(0.95)';
 
-                // Fade out envelope to reveal hero
                 setTimeout(() => {
                     envelopeSection.style.transition = 'opacity 1.2s ease, visibility 1.2s ease';
                     envelopeSection.style.opacity = '0';
                     envelopeSection.style.visibility = 'hidden';
                     envelopeSection.style.pointerEvents = 'none';
 
-                    // Unlock scroll and init Lenis after envelope fades
                     setTimeout(() => {
                         unlockScroll();
                         initLenis();
                     }, 1200);
                 }, 800);
             }, 2800);
+        }
+
+        window.addEventListener('wheel', (e) => {
+            if (envelopeOpened) return;
+            e.preventDefault();
+            e.stopPropagation();
+            openEnvelope();
         }, { passive: false, capture: true });
 
-        // Prevent touch scrolling on mobile
+        // Prevent touch scrolling on mobile while envelope is closed
         window.addEventListener('touchmove', (e) => {
             if (!envelopeOpened) {
                 e.preventDefault();
                 e.stopPropagation();
             }
         }, { passive: false, capture: true });
+
+        // Open envelope on tap/swipe on mobile
+        let touchStartY = 0;
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            if (envelopeOpened) return;
+            const touchEndY = e.changedTouches[0].clientY;
+            const swipedUp = touchStartY - touchEndY > 10;
+            // open on tap OR swipe up
+            if (!swipedUp || touchStartY - touchEndY >= 0) {
+                openEnvelope();
+            }
+        }, { passive: true });
 
         // Scroll locked via lockScroll() function above
 
@@ -1686,6 +1702,19 @@
                 if (lenis) lenis.raf(time * 1000);
             });
             gsap.ticker.lagSmoothing(0);
+
+            // Scroll velocity blur effect
+            lenis.on('scroll', ({ velocity }) => {
+                if (Math.abs(velocity) > 0.5) {
+                    document.querySelectorAll('.event-visual img, .gallery-showcase img').forEach(img => {
+                        img.style.filter = `blur(${Math.min(Math.abs(velocity) * 0.5, 5)}px) sepia(0.3)`;
+                    });
+                } else {
+                    document.querySelectorAll('.event-visual img, .gallery-showcase img').forEach(img => {
+                        img.style.filter = 'sepia(0.2) contrast(1.1)';
+                    });
+                }
+            });
         }
 
         // ===== COUNTDOWN TIMER =====
@@ -2062,18 +2091,6 @@
             fx.setText('Manjinder <span>&</span> Khujesta');
         }, 2500);
 
-        // ===== SCROLL VELOCITY BLUR =====
-        lenis.on('scroll', ({ velocity }) => {
-            if (Math.abs(velocity) > 0.5) {
-                document.querySelectorAll('.event-visual img, .gallery-showcase img').forEach(img => {
-                    img.style.filter = `blur(${Math.min(Math.abs(velocity) * 0.5, 5)}px) sepia(0.3)`;
-                });
-            } else {
-                document.querySelectorAll('.event-visual img, .gallery-showcase img').forEach(img => {
-                    img.style.filter = 'sepia(0.2) contrast(1.1)';
-                });
-            }
-        });
 
         // ===== RSVP FORM HANDLER =====
         document.getElementById('rsvpForm').addEventListener('submit', function(e) {
