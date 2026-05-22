@@ -1834,7 +1834,8 @@
         gsap.from('.family-side', {
             scrollTrigger: {
                 trigger: '.families-grid',
-                start: 'top 80%',
+                start: 'top 85%',
+                toggleActions: 'play none none none',
                 once: true
             },
             y: 60,
@@ -1844,10 +1845,18 @@
             ease: 'power3.out'
         });
 
+        // Fallback: ensure cards are visible if ScrollTrigger never fires
+        document.querySelectorAll('.family-side').forEach(el => {
+            el.style.willChange = 'transform, opacity';
+        });
+
+        ScrollTrigger.refresh();
+
         gsap.from('.families-connector', {
             scrollTrigger: {
                 trigger: '.families-grid',
                 start: 'top 80%',
+                toggleActions: 'play none none none',
                 once: true
             },
             scale: 0,
