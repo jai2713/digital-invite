@@ -2241,22 +2241,43 @@
 
 
         // ===== RSVP FORM HANDLER =====
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxfCDf3kpUyZw0butOoQwFng2iq9uak-pHrr3p74qUnymRUlaEiUvrFrXOA1TJIo5gHbg/exec';
+
         document.getElementById('rsvpForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const formData = new FormData(this);
-            const data = {
-                timestamp: new Date().toISOString(),
-                name: formData.get('name'),
-                email: formData.get('email'),
-                attending: formData.get('attending'),
-                guests: formData.get('guests'),
-                events: formData.get('events'),
-                message: formData.get('message')
-            };
+            const btn = this.querySelector('.submit-btn');
+            btn.textContent = 'Sending…';
+            btn.disabled = true;
 
-            alert('RSVP Submitted! Sat Sri Akal! 🙏\n\n(Connect Google Sheets to save data)');
-            this.reset();
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+            params.append('name',      formData.get('name')      || '');
+            params.append('email',     formData.get('email')     || '');
+            params.append('attending', formData.get('attending') || '');
+            params.append('guests',    formData.get('guests')    || '');
+            params.append('events',    formData.get('events')    || '');
+            params.append('message',   formData.get('message')   || '');
+
+            fetch(SHEET_URL, {
+                method: 'POST',
+                body: params
+            })
+            .then(() => {
+                btn.textContent = '✓ RSVP Sent!';
+                btn.style.background = 'linear-gradient(135deg, #2d7a4f, #4caf50)';
+                this.reset();
+                setTimeout(() => {
+                    btn.textContent = 'Send RSVP';
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 4000);
+            })
+            .catch(() => {
+                btn.textContent = 'Try Again';
+                btn.disabled = false;
+                alert('Something went wrong. Please try again.');
+            });
         });
 
         // ── Couple Photo Carousel ──
