@@ -729,6 +729,90 @@
             pointer-events: none;
         }
 
+        /* ── Couple Carousel ── */
+        .couple-carousel {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 20px;
+        }
+
+        .carousel-track {
+            width: 100%;
+            height: 100%;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.35);
+            color: #fff;
+            font-size: 2rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: background 0.3s ease, transform 0.2s ease;
+            line-height: 1;
+        }
+
+        .carousel-btn:hover {
+            background: rgba(255,255,255,0.35);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .carousel-prev { left: 12px; }
+        .carousel-next { right: 12px; }
+
+        .carousel-dots {
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.45);
+            border: 1px solid rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .carousel-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+
         .couple-text h3 {
             font-family: 'Playfair Display', serif;
             font-size: 2.5rem;
@@ -1411,7 +1495,22 @@
 
         <div class="couple-grid">
             <div class="couple-image reveal-left">
-                <img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=800&q=80" alt="Couple">
+                <div class="couple-carousel" id="coupleCarousel">
+                    <div class="carousel-track">
+                        <img src="images/FE1.png" alt="Manjinder & Khujesta" class="carousel-slide active">
+                        <img src="images/FE2.png" alt="Manjinder & Khujesta" class="carousel-slide">
+                        <img src="images/FE4.png" alt="Manjinder & Khujesta" class="carousel-slide">
+                        <img src="images/FE5.png" alt="Manjinder & Khujesta" class="carousel-slide">
+                    </div>
+                    <button class="carousel-btn carousel-prev" aria-label="Previous photo">&#8249;</button>
+                    <button class="carousel-btn carousel-next" aria-label="Next photo">&#8250;</button>
+                    <div class="carousel-dots">
+                        <span class="carousel-dot active"></span>
+                        <span class="carousel-dot"></span>
+                        <span class="carousel-dot"></span>
+                        <span class="carousel-dot"></span>
+                    </div>
+                </div>
             </div>
             <div class="couple-text reveal-right">
                 <h3>A Sacred Union</h3>
@@ -2158,6 +2257,46 @@
             alert('RSVP Submitted! Sat Sri Akal! 🙏\n\n(Connect Google Sheets to save data)');
             this.reset();
         });
+
+        // ── Couple Photo Carousel ──
+        (function() {
+            const slides = document.querySelectorAll('#coupleCarousel .carousel-slide');
+            const dots   = document.querySelectorAll('#coupleCarousel .carousel-dot');
+            const prev   = document.querySelector('#coupleCarousel .carousel-prev');
+            const next   = document.querySelector('#coupleCarousel .carousel-next');
+            let current  = 0;
+            let timer    = null;
+            let paused   = false;
+
+            function goTo(index) {
+                slides[current].classList.remove('active');
+                dots[current].classList.remove('active');
+                current = (index + slides.length) % slides.length;
+                slides[current].classList.add('active');
+                dots[current].classList.add('active');
+            }
+
+            function startAuto() {
+                timer = setInterval(() => { if (!paused) goTo(current + 1); }, 3000);
+            }
+
+            // Prev / Next buttons
+            prev.addEventListener('click', (e) => { e.stopPropagation(); goTo(current - 1); });
+            next.addEventListener('click', (e) => { e.stopPropagation(); goTo(current + 1); });
+
+            // Dot navigation
+            dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+
+            // Hold to pause (mouse & touch)
+            const carousel = document.getElementById('coupleCarousel');
+            carousel.addEventListener('mousedown',   () => { paused = true; });
+            carousel.addEventListener('mouseup',     () => { paused = false; });
+            carousel.addEventListener('mouseleave',  () => { paused = false; });
+            carousel.addEventListener('touchstart',  () => { paused = true; },  { passive: true });
+            carousel.addEventListener('touchend',    () => { paused = false; });
+
+            startAuto();
+        })();
     </script>
 </body>
 </html>
